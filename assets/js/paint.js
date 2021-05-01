@@ -20,11 +20,11 @@ ctx.lineWidth = 2.5;
 let painting = false;
 let filling = false;
 
-function stopPainting() {
+const stopPainting = () => {
   painting = false;
 }
 
-function startPainting() {
+const startPainting = () => {
   painting = true;
 }
 
@@ -33,30 +33,35 @@ const beginPath = (x, y) => {
   ctx.moveTo(x, y);
 };
 
-const strokePath = (x, y) => {
+const strokePath = (x, y, color = null) => {
+  let currentColor = ctx.strokeStyle;
+  if(color !== null) {
+    currentColor = color;
+  }
   ctx.lineTo(x, y);
   ctx.stroke();
+  ctx.strokeStyle = currentColor;
 };
 
-function onMouseMove(event) {
+const onMouseMove = (event) => {
   const x = event.offsetX;
   const y = event.offsetY;
   if (!painting) {
     beginPath(x, y);
     getSocket().emit(window.events.beginPath, { x, y });
-  } else {
+  } else if(!filling) {
     strokePath(x, y);
-    getSocket().emit(window.events.strokePath, { x, y });
+    getSocket().emit(window.events.strokePath, { x, y, color: ctx.strokeStyle });
   }
 }
 
-function handleColorClick(event) {
+const handleColorClick = (event) => {
   const color = event.target.style.backgroundColor;
   ctx.strokeStyle = color;
   ctx.fillStyle = color;
 }
 
-function handleModeClick() {
+const handleModeClick = () => {
   if (filling === true) {
     filling = false;
     mode.innerText = "Fill";
@@ -66,13 +71,23 @@ function handleModeClick() {
   }
 }
 
-function handleCanvasClick() {
+const fill = (color = null) => {
+  let currentColor = ctx.fillStyle;
+  if(color !== null) {
+    ctx.fillStyle = color;
+  }
+  ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  ctx.fillStyle = currentColor;
+}
+
+const handleCanvasClick = () => {
   if (filling) {
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    fill();
+    getSocket().emit(window.events.fill, {color: ctx.fillStyle});
   }
 }
 
-function handleCM(event) {
+const handleCM = (event) => {
   event.preventDefault();
 }
 
@@ -94,4 +109,5 @@ if (mode) {
 }
 
 export const handleBeganPath = ({ x, y }) => beginPath(x, y);
-export const handleStrokedPath = ({ x, y }) => strokePath(x, y);
+export const handleStrokedPath = ({ x, y, color }) => strokePath(x, y, color);
+export const handleFilled = ({color}) => fill(color);
