@@ -112,7 +112,7 @@ export const disableCanvas = () => {
   canvas.removeEventListener("click", handleCanvasClick);
 }
 
-const enableCanvas = () => {
+export const enableCanvas = () => {
   canvas.addEventListener("mousemove", onMouseMove);
   canvas.addEventListener("mousedown", startPainting);
   canvas.addEventListener("mouseup", stopPainting);
@@ -126,9 +126,12 @@ export const hideControls = () => {
 
 export const showControls = () => {
   controls.style.opacity = 1;
+  console.log("!");
 }
 
+export const resetCanvas = () => fill("#ffffff");
+
 if (canvas) {
-  enableCanvas();
   canvas.addEventListener("contextmenu", handleCM);
+  hideControls();
 }
